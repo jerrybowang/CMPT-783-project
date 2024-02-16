@@ -43,8 +43,9 @@ if __name__ == "__main__":
         if len(args.enumeration) > 2:
             parser.error("Invalid number of arguments for Directory Enumeration module, at most 2 arguments are allowed")
 
-    # result variables
-    host_discovery_result = None
+    # result variables, includes metadata
+    # change the default value accordingly
+    host_discovery_result = ([], "", 0)
     port_scanning_result = None
     directory_enumeration_result = None
     # main logic
@@ -52,7 +53,6 @@ if __name__ == "__main__":
         print(f"Host Discovery module with argument: {args.discovery[0]}")
         # run host discovery module
         host_discovery_result = hd.host_discovery(args.discovery[0])
-        print(host_discovery_result)
     if args.scanning:
         print(f"Port Scanning module with argument: {args.scanning[0]}")
     if args.enumeration:
@@ -63,6 +63,8 @@ if __name__ == "__main__":
         parser.exit()
     
     # result generation
-    
+    rg.result_generator(host_discovery_result, 
+                        port_scanning_result, 
+                        directory_enumeration_result)
     
 
