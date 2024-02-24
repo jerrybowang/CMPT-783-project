@@ -46,7 +46,7 @@ if __name__ == "__main__":
     # result variables, includes metadata
     # change the default value accordingly
     host_discovery_result = ([], "", 0)
-    port_scanning_result = None
+    port_scanning_result = ([], 0)
     directory_enumeration_result = None
     # main logic
     if args.discovery:
@@ -55,6 +55,7 @@ if __name__ == "__main__":
         host_discovery_result = hd.host_discovery(args.discovery[0])
     if args.scanning:
         print(f"Port Scanning module with argument: {args.scanning[0]}")
+        port_scanning_result = ps.scan_all_ports(args.scanning[0])
     if args.enumeration:
         print(f"Directory Enumeration module with argument: {args.enumeration[0]} and wordlist: {args.enumeration[1] if len(args.enumeration) > 1 else 'default'}")
     if not any(vars(args).values()):
