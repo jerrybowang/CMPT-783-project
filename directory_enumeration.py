@@ -1,7 +1,7 @@
 import requests
 import sys
 import os
-import threading
+import concurrent.futures
 import time
 
 def read_names(names_file):
@@ -45,12 +45,30 @@ if __name__ == "__main__":
     # Enumerate Start:
     print("== Directory Enumeration Start ==")
     print("(Time) url (status | size)")
-    for dirs in dir_names:
-        temp_url = url+ "/" + dirs
-        enumerate_directory(temp_url)
-    print("\n== File Enumeration Start ==")
-    for files in file_names:
-        temp_url = url+ "/" + files
-        enumerate_directory(temp_url)
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        # Enumerate directories
+        futures = []
+        for dirs in dir_names:
+            temp_url = url + "/" + dirs
+            futures.append(executor.submit(enumerate_directory, temp_url))
+
+        # Wait for all futures to complete
+        concurrent.futures.wait(futures)
     
+    
+    print("\n== File Enumeration Start ==")
+    
+        
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        # Enumerate files
+        futures = []
+        for files in file_names:
+            temp_url = url+ "/" + files
+            futures.append(executor.submit(enumerate_directory, temp_url))
+
+        # Wait for all futures to complete
+        concurrent.futures.wait(futures)
+        
+
+    print("\n== Enumeration Complete ==")
         
