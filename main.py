@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
     # result variables, includes metadata
     # change the default value accordingly
-    host_discovery_result = ([], "", 0)
+    host_discovery_result = ([], "", 0, 0)
     port_scanning_result = ([], 0)
     directory_enumeration_result = None
     # main logic
