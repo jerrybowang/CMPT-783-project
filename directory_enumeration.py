@@ -9,7 +9,6 @@ def read_names(names_file):
     names = []
 
     try:
-
         with open(names_file, 'r') as f:
             for line in f:
                 names.append(line.strip())
@@ -65,7 +64,6 @@ def enumerate_directory(url: str, dictionary: str) -> typing.List[tuple[str, int
             else:
                 file_names.append(name)
     else:
-        print("0")
         dir_names = read_names("dictionary/dir_name_dictionary.txt")
         file_names = read_names("dictionary/file_name_dictionary.txt")
     
