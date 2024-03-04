@@ -16,8 +16,10 @@ def read_names(names_file):
         return names
     except FileNotFoundError:
         print("Loading dictionaries: files not found")
+        return names
     except Exception as e:
         print("Loading dictionaries error:", str(e))
+        return names
         
         
 def get_url_file(url):
