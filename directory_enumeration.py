@@ -15,9 +15,9 @@ def read_names(names_file):
 
         return names
     except FileNotFoundError:
-        print("Loading default dictionaries: files not found")
+        print("Loading dictionaries: files not found")
     except Exception as e:
-        print("Loading default dictionaries error:", str(e))
+        print("Loading dictionaries error:", str(e))
         
         
 def enumerate_directory(url):
@@ -39,8 +39,8 @@ if __name__ == "__main__":
     url = sys.argv[1]
     dir_names = []
     file_names = []
-    dir_names = read_names("dictionary/dir_name_dictionary.txt")
-    file_names = read_names("dictionary/file_name_dictionary.txt")
+    dir_names = read_names("dictionary/test_name_dictionary.txt")
+    file_names = read_names("dictionary/test_name_dictionary.txt")
     
     # Enumerate Start:
     print("== Directory Enumeration Start ==")
