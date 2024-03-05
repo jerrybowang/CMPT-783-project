@@ -2,11 +2,12 @@ import subprocess
 import threading
 import ipaddress
 import typing
+import time
 
 mutex = threading.Lock()
 
 
-def check_host(pin: str, live_hosts: typing.List[str]) -> None:
+def check_host(pin: str, live_hosts: list[str]) -> None:
     command = ["ping", pin, "-c", "1"]
     # don't care about the ping output
     result = subprocess.run(
@@ -21,7 +22,7 @@ def check_host(pin: str, live_hosts: typing.List[str]) -> None:
     return
 
 
-def get_live_hosts(ips: typing.Iterator, live_hosts: typing.List[str]) -> int:
+def get_live_hosts(ips: typing.Iterator, live_hosts: list[str]) -> int:
     threads = []
     count = 0
     for i in ips:
@@ -37,7 +38,8 @@ def get_live_hosts(ips: typing.Iterator, live_hosts: typing.List[str]) -> int:
     return count
 
 
-def host_discovery(cidr: str) -> tuple[typing.List[str], str, int]:
+def host_discovery(cidr: str) -> tuple[list[str], str, int, float]:
+    startTime = time.time()
     live_hosts = []
     logical_range = 0
     try:
@@ -47,6 +49,6 @@ def host_discovery(cidr: str) -> tuple[typing.List[str], str, int]:
         logical_range = get_live_hosts(ip_network.hosts(), live_hosts)
     except ValueError:
         print(f"Invalid CIDR: {cidr}")
-        return [], "", 0
+        return ([], "", 0, 0)
 
-    return live_hosts, cidr, logical_range
+    return live_hosts, cidr, logical_range, time.time() - startTime
