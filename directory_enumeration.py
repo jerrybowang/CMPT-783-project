@@ -1,8 +1,7 @@
 import requests
 import sys
-import os
 import concurrent.futures
-import time
+# import time
 import typing
 
 def read_names(names_file):
@@ -15,11 +14,11 @@ def read_names(names_file):
 
         return names
     except FileNotFoundError:
-        print("Loading dictionaries: files not found")
-        return names
+        print("Loading dictionaries: files not found\nExited")
+        exit()
     except Exception as e:
-        print("Loading dictionaries error:", str(e))
-        return names
+        print("Loading dictionaries error:", str(e),"\nExited")
+        exit()
         
         
 def get_url_file(url):
@@ -58,7 +57,7 @@ def enumerate_directory(url: str, dictionary: str) -> typing.List[tuple[str, int
     results = []
     dir_names = []
     file_names = []
-    if dictionary != "default":
+    if dictionary != None:
         dictionary_input = read_names(dictionary)
         for name in dictionary_input:
             if name[-1] == "/":
@@ -91,7 +90,7 @@ def enumerate_directory(url: str, dictionary: str) -> typing.List[tuple[str, int
                 results.append(result)
     
     
-    print("\n== File Enumeration Start ==")
+    print("== File Enumeration Start ==")
     with concurrent.futures.ThreadPoolExecutor() as executor:
         # Enumerate files
         futures = []
@@ -109,7 +108,7 @@ def enumerate_directory(url: str, dictionary: str) -> typing.List[tuple[str, int
                 results.append(result)
         
 
-    print("\n== Enumeration Complete ==")
+    print("== Enumeration Complete ==")
 
     return results
 

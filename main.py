@@ -61,7 +61,7 @@ if __name__ == "__main__":
         if len(args.enumeration) > 1:
             directory_enumeration_result = de.enumerate_directory(args.enumeration[0], args.enumeration[1])
         else:
-            directory_enumeration_result = de.enumerate_directory(args.enumeration[0], "default")
+            directory_enumeration_result = de.enumerate_directory(args.enumeration[0], None)
     if not any(vars(args).values()):
         # display help message when no argument is passed
         parser.print_help()
