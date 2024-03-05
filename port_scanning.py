@@ -11,9 +11,12 @@ def port_scanning(ip: str, port: int, open_ports: list) -> None:
     s.settimeout(0.5)
     # connect to the server
     try:
-        s.connect((ip, port))
-        server_name = socket.gethostbyaddr(ip)[0]     
-        server_port= f"{server_name}:{port}"
+        s.connect((ip, port))   
+        try:
+            service = socket.getservbyport(port)
+        except socket.error:
+            service = "unknown"
+        server_port= f"{port}:{service}"
         open_ports.append(server_port)
     except:
         return None
