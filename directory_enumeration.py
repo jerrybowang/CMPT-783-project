@@ -1,8 +1,20 @@
 import requests
-import sys
 import concurrent.futures
 # import time
 import typing
+
+# ===========================================================
+# ====================== Auther's NOTE ======================
+# ===========================================================
+#
+# return value is an list of tuples(url, HTTP_status_code, size)
+# Enmuerated directory will not show the size
+# HTTP_status_code == 404 / 0 will be dropped
+# HTTP_status_code == -1 means the url is unavailable
+# HTTP_status_code == 0  means there is an error accessing the url
+#
+# ===========================================================
+
 
 def read_names(names_file):
     names = []
@@ -12,13 +24,16 @@ def read_names(names_file):
             for line in f:
                 names.append(line.strip())
 
+        if len(names) == 0:
+            print(f"Wordlist \"{names_file}\" is empty.")
+
         return names
     except FileNotFoundError:
-        print("Loading dictionaries: files not found\nExited")
-        exit()
+        print("Loading wordlist: files not found")
+        return []
     except Exception as e:
-        print("Loading dictionaries error:", str(e),"\nExited")
-        exit()
+        print("Loading wordlist error:", str(e))
+        return []
         
         
 def get_url_file(url):
@@ -31,7 +46,7 @@ def get_url_file(url):
         #   print("("+formatted_time+")", url, "- (" + str(response.status_code) + " | " + str(len(response.content)) + ")")
 
     except Exception as e:
-        print("An error occurred:", str(e))
+        print("An error occurred in ", url)
         return ("error", 0, 0)
 
         
@@ -45,31 +60,41 @@ def get_url_dir(url):
         #   print("("+formatted_time+")", url, "- (" + str(response.status_code) + " | " + str(len(response.content)) + ")")
 
     except Exception as e:
-        print("An error occurred:", str(e))
+        print("An error occurred When accessing", url)
         return ("error", 0, 0)        
 
 
-def enumerate_directory(url: str, dictionary: str) -> typing.List[tuple[str, int, int]]:
+def enumerate_directory(url: str, wordlist: str) -> typing.List[tuple[str, int, int]]:
     """
     Enumerate files and directories within the specified URL.
     """
+    # check if server is online
+    if get_url_dir(url)[0] == "error":
+        print(f"\n{url} is unavailable\n")
+        return [(f"{url} is unavailable", -1, 0)]
+
+
     # Initialize:
     results = []
     dir_names = []
     file_names = []
-    if dictionary != None:
-        dictionary_input = read_names(dictionary)
-        for name in dictionary_input:
+    if wordlist != None:
+        wordlist_input = read_names(wordlist)
+        if len(wordlist_input) == 0:
+            # check if no names are read
+            print("Enumeration Stop")
+            return []
+        
+        for name in wordlist_input:
             if name[-1] == "/":
                 dir_names.append(name)
             else:
                 file_names.append(name)
     else:
-        dir_names = read_names("dictionary/dir_name_dictionary.txt")
-        file_names = read_names("dictionary/file_name_dictionary.txt")
+        dir_names = read_names("wordlist/dir_name_wordlist.txt")
+        file_names = read_names("wordlist/file_name_wordlist.txt")
     
-    
-    
+
     # Enumerate Start:
     print("== Directory Enumeration Start ==")
     #print("(Time) url (status | size)")
@@ -113,6 +138,6 @@ def enumerate_directory(url: str, dictionary: str) -> typing.List[tuple[str, int
     return results
 
 
-if __name__ == "__main__":
-    url = sys.argv[1]
-    print(enumerate_directory(url, "dictionary/test_name_dictionary.txt"))
+# if __name__ == "__main__":
+#     url = sys.argv[1]
+#     print(enumerate_directory(url, "wordlist/test_name_wordlist.txt"))
