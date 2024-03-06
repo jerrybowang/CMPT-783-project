@@ -20,7 +20,7 @@ def port_scanning(ip: str, port: int) -> str:
         server_port= f"{port}:{service}"
         return server_port
     except:
-        return None
+        return ""
     # close the socket
     # s.close()
 
@@ -30,6 +30,7 @@ def scan_all_ports(ip: str) -> tuple[typing.List[str], float]:
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future_to_port = {executor.submit(port_scanning, ip, port): port for port in range(1, 65536)}
+        concurrent.futures.wait(future_to_port)
         for future in concurrent.futures.as_completed(future_to_port):
             port = future_to_port[future]
             result = future.result()
