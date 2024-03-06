@@ -71,14 +71,14 @@ def enumerate_directory(url: str, wordlist: str) -> typing.List[tuple[str, int, 
     # check if server is online
     if get_url_dir(url)[0] == "error":
         print(f"\n{url} is unavailable\n")
-        return [(f"{url} is unavailable", -1, 0)]
+        return [(url, -1, 0)]
 
 
     # Initialize:
     results = []
     dir_names = []
     file_names = []
-    if wordlist != None:
+    if wordlist:
         wordlist_input = read_names(wordlist)
         if len(wordlist_input) == 0:
             # check if no names are read
