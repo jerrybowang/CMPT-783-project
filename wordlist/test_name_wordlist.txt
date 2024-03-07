@@ -1,6 +1,11 @@
 index.html
+index.php
 index.html
-index.html
+login.html
+login.php
 server-status/
 icons/
 index/
+admin/
+images/
+pictures/

@@ -1,6 +1,5 @@
 import socket
 import time
-import typing
 import concurrent.futures
 
 
@@ -24,7 +23,7 @@ def port_scanning(ip: str, port: int) -> str:
     # close the socket
     # s.close()
 
-def scan_all_ports(ip: str) -> tuple[typing.List[str], float]:
+def scan_all_ports(ip: str) -> list[str]:
     startTime = time.time()
     ports_info = []
 
@@ -32,7 +31,6 @@ def scan_all_ports(ip: str) -> tuple[typing.List[str], float]:
         future_to_port = {executor.submit(port_scanning, ip, port): port for port in range(1, 65536)}
         concurrent.futures.wait(future_to_port)
         for future in concurrent.futures.as_completed(future_to_port):
-            port = future_to_port[future]
             result = future.result()
             if result:
                 ports_info.append(result)
@@ -40,7 +38,7 @@ def scan_all_ports(ip: str) -> tuple[typing.List[str], float]:
 
     print('Time taken:', time.time() - startTime)
     print('Open ports:', ports_info)
-    return ports_info, time.time() - startTime
+    return ports_info
 
 
 

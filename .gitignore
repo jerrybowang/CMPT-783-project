@@ -166,3 +166,4 @@ cython_debug/
 
 # other artifacts
 result.txt
+imm_result/
