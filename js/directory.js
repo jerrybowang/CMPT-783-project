@@ -28,7 +28,8 @@ class directory {
       vis.config.margin.right;
 
     vis.height = vis.width;
-    vis.radius = vis.width / 6;
+    vis.radius = vis.width / 12;
+
     // Create the arc generator.
     vis.arc = d3
       .arc()
@@ -38,18 +39,20 @@ class directory {
       .padRadius(vis.radius * 1.5)
       .innerRadius((d) => d.y0 * vis.radius)
       .outerRadius((d) => Math.max(d.y0 * vis.radius, d.y1 * vis.radius - 1));
+
     // Create the SVG container.
     vis.svg = d3
       .select(vis.config.parentElement)
       .append("svg")
       .attr("viewBox", [-vis.width / 2, -vis.height / 2, vis.width, vis.width])
-      .style("font", "10px sans-serif");
+      .style("font", "8px sans-serif");
 
     vis.label = vis.svg
       .append("g")
       .attr("pointer-events", "none")
       .attr("text-anchor", "middle")
       .style("user-select", "none");
+
     vis.color = d3.scaleOrdinal(
       d3.quantize(d3.interpolateRainbow, vis.data.children.length + 1)
     );
@@ -60,10 +63,13 @@ class directory {
    */
   updateVis() {
     let vis = this;
+
     vis.hierarchy = d3
       .hierarchy(vis.data)
-      .sum((d) => d.value)
-      .sort((a, b) => b.value - a.value);
+      .sum((d) => {
+        return d.size;
+      })
+      .sort((a, b) => b.size - a.size);
     vis.root = d3.partition().size([2 * Math.PI, vis.hierarchy.height + 1])(
       vis.hierarchy
     );
@@ -77,9 +83,8 @@ class directory {
    */
   renderVis() {
     let vis = this;
-
     // Append the arcs.
-    const path = vis.svg
+    vis.path = vis.svg
       .append("g")
       .selectAll("path")
       .data(vis.root.descendants().slice(1))
@@ -95,41 +100,49 @@ class directory {
         vis.arcVisible(d.current) ? "auto" : "none"
       )
       .attr("d", (d) => vis.arc(d.current));
-    console.log(path);
     // Make them clickable if they have children.
-    path
+    vis.path
       .filter((d) => d.children)
       .style("cursor", "pointer")
-      .on("click", this.clicked);
+      .on("click", (event, d) => {
+        this.clicked(event, d, vis, labels);
+      });
+
     const format = d3.format(",d");
-    path.append("title").text(
-      (d) =>
-        `${d
-          .ancestors()
-          .map((d) => d.data.name)
-          .reverse()
-          .join("/")}\n${format(d.value)}`
-    );
-    const labels = vis.label
+
+    vis.path.append("title").text((d) => {
+      return `${d
+        .ancestors()
+        .map((d) => d.data.name)
+        .reverse()
+        .join("/")}\n${format(d.size)}`;
+    });
+
+    let labels = vis.label
       .selectAll("text")
       .data(vis.root.descendants().slice(1))
       .join("text")
-      .attr("dy", "0.35em")
-      .attr("fill-opacity", (d) => vis.labelVisible(d.current))
+      .attr("dy", "0.25em")
+      .attr("fill-opacity", (d) => {
+        return vis.labelVisible(d.current);
+      })
       .attr("transform", (d) => vis.labelTransform(d.current, vis.radius))
       .text((d) => d.data.name);
-    const parent = vis.svg
+
+    vis.parent = vis.svg
       .append("circle")
       .datum(vis.root)
       .attr("r", vis.radius)
       .attr("fill", "none")
       .attr("pointer-events", "all")
-      .on("click", this.clicked);
+      .on("click", (event, d) => {
+        this.clicked(event, d, vis, labels);
+      });
   }
   // Handle zoom on click.
 
-  clicked(event, p) {
-    parent.datum(p.parent || vis.root);
+  clicked(event, p, vis, label) {
+    vis.parent.datum(p.parent || vis.root);
 
     vis.root.each(
       (d) =>
@@ -147,12 +160,12 @@ class directory {
         })
     );
 
-    const t = svg.transition().duration(750);
+    const t = vis.svg.transition().duration(750);
 
     // Transition the data on all arcs, even the ones that aren’t visible,
     // so that if this transition is interrupted, entering arcs will start
     // the next transition from the desired position.
-    path
+    vis.path
       .transition(t)
       .tween("data", (d) => {
         const i = d3.interpolate(d.current, d.target);
@@ -168,7 +181,7 @@ class directory {
         vis.arcVisible(d.target) ? "auto" : "none"
       )
 
-      .attrTween("d", (d) => () => arc(d.current));
+      .attrTween("d", (d) => () => vis.arc(d.current));
 
     label
       .filter(function (d) {
@@ -186,7 +199,11 @@ class directory {
   }
 
   labelVisible(d) {
-    return d.y1 <= 3 && d.y0 >= 1 && (d.y1 - d.y0) * (d.x1 - d.x0) > 0.03;
+    if (d.y1 <= 3 && d.y0 >= 1 && (d.y1 - d.y0) * (d.x1 - d.x0) > 0.03) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
 
   labelTransform(d, radius) {
