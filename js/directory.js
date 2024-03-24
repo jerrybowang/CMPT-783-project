@@ -4,7 +4,7 @@ class directory {
    * @param {Object}
    * @param {Array}
    */
-  constructor(_config, _data) {
+  constructor(_config, _data, _dispatcher, _currValue, _diff) {
     this.config = {
       parentElement: _config.parentElement,
       containerWidth: _config.containerWidth || 800,
@@ -13,6 +13,9 @@ class directory {
       tooltipPadding: _config.tooltipPadding || 15,
     };
     this.data = _data;
+    this.dispatcher = _dispatcher;
+    this.currValue = _currValue;
+    this.diff = _diff;
     this.initVis();
   }
 
@@ -44,7 +47,8 @@ class directory {
     vis.svg = d3
       .select(vis.config.parentElement)
       .append("svg")
-      .attr("viewBox", [-vis.width / 2, -vis.height / 2, vis.width, vis.width])
+      // .attr("viewBox", [-vis.width / 2, -vis.height / 2, vis.width, vis.width])
+      .attr("viewBox", [-200, -200.5, 745, 745])
       .style("font", "8px sans-serif");
 
     vis.label = vis.svg
@@ -56,6 +60,29 @@ class directory {
     vis.color = d3.scaleOrdinal(
       d3.quantize(d3.interpolateRainbow, vis.data.children.length + 1)
     );
+
+    vis.dataTime = d3.range(0, 5);
+    vis.min = 1;
+    vis.max = 10;
+    vis.slider = d3
+      .sliderBottom()
+      .min(vis.min)
+      .max(vis.max)
+      .step(1)
+      .width(500)
+      .default(false)
+      .on("onchange", (val) => {
+        vis.dispatcher.call("timeline", event, val, vis.currValue);
+      });
+
+    d3.select("div#slider")
+      .append("svg")
+      .attr("width", 550)
+      .attr("height", 100)
+      .append("g")
+      .attr("transform", "translate(30,30)")
+      .call(vis.slider);
+    this.updateVis();
   }
 
   /**
@@ -73,6 +100,7 @@ class directory {
     vis.root = d3.partition().size([2 * Math.PI, vis.hierarchy.height + 1])(
       vis.hierarchy
     );
+
     vis.root.each((d) => (d.current = d));
 
     vis.renderVis();
@@ -83,15 +111,20 @@ class directory {
    */
   renderVis() {
     let vis = this;
+
     // Append the arcs.
     vis.path = vis.svg
-      .append("g")
+      .join("g")
       .selectAll("path")
       .data(vis.root.descendants().slice(1))
       .join("path")
       .attr("fill", (d) => {
-        while (d.depth > 1) d = d.parent;
-        return vis.color(d.data.name);
+        if (vis.diff != undefined && vis.diff.includes(d.data.name)) {
+          return "#F4CF20";
+        } else {
+          while (d.depth > 1) d = d.parent;
+          return vis.color(d.data.name);
+        }
       })
       .attr("fill-opacity", (d) => {
         return vis.arcVisible(d.current) ? (d.children ? 0.6 : 0.4) : 0;
@@ -100,6 +133,7 @@ class directory {
         vis.arcVisible(d.current) ? "auto" : "none"
       )
       .attr("d", (d) => vis.arc(d.current));
+
     // Make them clickable if they have children.
     vis.path
       .filter((d) => d.children)
@@ -110,7 +144,7 @@ class directory {
 
     const format = d3.format(",d");
 
-    vis.path.append("title").text((d) => {
+    vis.path.join("title").text((d) => {
       return `${d
         .ancestors()
         .map((d) => d.data.name)
@@ -123,6 +157,13 @@ class directory {
       .data(vis.root.descendants().slice(1))
       .join("text")
       .attr("dy", "0.25em")
+      .attr("font-weight", (d) => {
+        if (vis.diff != undefined && vis.diff.includes(d.data.name)) {
+          return "900";
+        } else {
+          return "400";
+        }
+      })
       .attr("fill-opacity", (d) => {
         return vis.labelVisible(d.current);
       })
