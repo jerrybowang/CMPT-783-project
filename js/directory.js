@@ -20,11 +20,10 @@ class directory {
   }
 
   /**
-   * We initialize scales/axes and append static elements, such as axis titles.
+   * We initialize and append static elements
    */
   initVis() {
     let vis = this;
-    // Calculate inner chart size. Margin specifies the space around the actual chart.
     vis.width =
       vis.config.containerWidth -
       vis.config.margin.left -
@@ -61,9 +60,15 @@ class directory {
       d3.quantize(d3.interpolateRainbow, vis.data.children.length + 1)
     );
 
-    vis.dataTime = d3.range(0, 5);
+    // let time = ["2024-03-15_16-08-20", "2024-03-15_16-08-25"];
+    // var parseTime = d3.timeParse("%Y-%m-%d_%H-%M-%S");
+    // vis.datatime2 = time.map(function (d) {
+    //   return parseTime(d);
+    // });
+
     vis.min = 1;
     vis.max = 10;
+
     vis.slider = d3
       .sliderBottom()
       .min(vis.min)
