@@ -83,7 +83,7 @@ if __name__ == "__main__":
     if args.schedule:
         # =================================== Schedule Module ================================= #
         config = {'Host_Discovery_Module': '', 
-                  'Port_Scanning_module': '', 
+                  'Port_Scanning_Module': '', 
                   'Directory_Enumeration_Module': '', 
                   'Customized_Wordlist': '', 
                   'Scan_Time_Interval': '0'}
@@ -103,7 +103,7 @@ if __name__ == "__main__":
             # ask user for the configuration
             config['Host_Discovery_Module'] = input("\n- Please enter the CIDR for Host Discovery Module\n(Press Enter if NOT Active this module)\nCIDR: ")
 
-            config['Port_Scanning_module'] = input("\n- Please enter the IP Address for Port Scanning module\n(Press Enter if NOT Active this module)\nIP Address: ")
+            config['Port_Scanning_Module'] = input("\n- Please enter the IP Address for Port Scanning module\n(Press Enter if NOT Active this module)\nIP Address: ")
 
             config['Directory_Enumeration_Module'] = input("\n- Please enter the URL for Directory Enumeration Module\n(Press Enter if NOT Active this module)\nURL: ")
             if config['Directory_Enumeration_Module']:
@@ -130,7 +130,7 @@ if __name__ == "__main__":
         os.mkdir("imm_result")
         
         # run the program based on the configuration
-        if not config['Host_Discovery_Module'] and not config['Port_Scanning_module'] and not config['Directory_Enumeration_Module']:
+        if not config['Host_Discovery_Module'] and not config['Port_Scanning_Module'] and not config['Directory_Enumeration_Module']:
             print("Loaded configure file is invaild.")
             parser.exit()
             
@@ -142,8 +142,8 @@ if __name__ == "__main__":
                 else:
                     futures.append(executor.submit(dump_function))
 
-                if config['Port_Scanning_module']:
-                    futures.append(executor.submit(ps.scan_all_ports, config['Port_Scanning_module']))
+                if config['Port_Scanning_Module']:
+                    futures.append(executor.submit(ps.scan_all_ports, config['Port_Scanning_Module']))
                 else:
                     futures.append(executor.submit(dump_function))
 
@@ -165,13 +165,11 @@ if __name__ == "__main__":
                             host_discovery_result = future.result()
                         except Exception:
                             print("No result OR Error while getting result in Host Discovery Module.")
-                            host_discovery_result = ["No result"]
                             pass
                     elif index == 1:
                         try:
                             port_scanning_result = future.result()
                         except Exception:
-                            port_scanning_result = ["No result"]
                             print("No result OR Error while getting result in Port Scanning Module.")
                             pass
                     else:
