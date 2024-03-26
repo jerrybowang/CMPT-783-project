@@ -86,7 +86,8 @@ if __name__ == "__main__":
                   'Port_Scanning_Module': '', 
                   'Directory_Enumeration_Module': '', 
                   'Customized_Wordlist': '', 
-                  'Scan_Time_Interval': '0'}
+                  'Scan_Time_Interval': '0',
+                  'Total_Scan_Number':'0'}
         
         print("Schedule mode")
         # read the schedule configuration file, if no file is found, the program will ask for the configuration
@@ -115,6 +116,12 @@ if __name__ == "__main__":
             elif int(config['Scan_Time_Interval']) < 1:
                 config['Scan_Time_Interval'] = '0'
             
+            config['Total_Scan_Number'] = input("\n- Please enter the Total Scan Number\n(Input 5 if scan 5 times)\nTotal Scan Number: ")
+            if not config['Total_Scan_Number']:
+                config['Total_Scan_Number'] = '1'
+            elif int(config['Total_Scan_Number']) < 1:
+                config['Total_Scan_Number'] = '1'
+            
             # save the configuration to the file and exit
             data_str = "\n".join([f"{key}: {value}" for key, value in config.items()])
             with open("schedule.conf", 'w') as f:
@@ -135,58 +142,66 @@ if __name__ == "__main__":
             parser.exit()
             
         else:
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                futures = []
-                if config['Host_Discovery_Module']:
-                    futures.append(executor.submit(hd.host_discovery, config['Host_Discovery_Module']))
-                else:
-                    futures.append(executor.submit(dump_function))
-
-                if config['Port_Scanning_Module']:
-                    futures.append(executor.submit(ps.scan_all_ports, config['Port_Scanning_Module']))
-                else:
-                    futures.append(executor.submit(dump_function))
-
-                if config['Directory_Enumeration_Module']:
-                    if not config['Customized_Wordlist']:
-                        futures.append(executor.submit(de.enumerate_directory, config['Directory_Enumeration_Module'], 'default'))
-                    else:
-                        futures.append(executor.submit(de.enumerate_directory, config['Directory_Enumeration_Module'], config['Customized_Wordlist']))
-                else:
-                    futures.append(executor.submit(dump_function))
-
-                # Wait for all futures to complete
-                concurrent.futures.wait(futures)
-                # Save results
-                index = 0
-                for future in concurrent.futures.as_completed(futures):
-                    if index == 0:
-                        try:
-                            host_discovery_result = future.result()
-                        except Exception:
-                            print("No result OR Error while getting result in Host Discovery Module.")
-                            pass
-                    elif index == 1:
-                        try:
-                            port_scanning_result = future.result()
-                        except Exception:
-                            print("No result OR Error while getting result in Port Scanning Module.")
-                            pass
-                    else:
-                        try:
-                            directory_enumeration_result = future.result()
-                        except Exception:
-                            print("No result OR Error while getting result in Directory Enumeration Module.")
-                            pass
-
-                rg.imm_file(host_discovery_result, 
-                            port_scanning_result, 
-                            directory_enumeration_result)
-                
+            count = int(config['Total_Scan_Number'])
+            while count > 0:
                 # reset the result
                 host_discovery_result = ([], "", 0)
                 port_scanning_result = []
                 directory_enumeration_result = []
+
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    futures = []
+                    if config['Host_Discovery_Module']:
+                        futures.append(executor.submit(hd.host_discovery, config['Host_Discovery_Module']))
+                    else:
+                        futures.append(executor.submit(dump_function))
+
+                    if config['Port_Scanning_Module']:
+                        futures.append(executor.submit(ps.scan_all_ports, config['Port_Scanning_Module']))
+                    else:
+                        futures.append(executor.submit(dump_function))
+
+                    if config['Directory_Enumeration_Module']:
+                        if not config['Customized_Wordlist']:
+                            futures.append(executor.submit(de.enumerate_directory, config['Directory_Enumeration_Module'], 'default'))
+                        else:
+                            futures.append(executor.submit(de.enumerate_directory, config['Directory_Enumeration_Module'], config['Customized_Wordlist']))
+                    else:
+                        futures.append(executor.submit(dump_function))
+
+                    # Wait for all futures to complete
+                    concurrent.futures.wait(futures)
+                    # Save results
+                    index = 0
+                    for future in concurrent.futures.as_completed(futures):
+                        if index == 0:
+                            try:
+                                host_discovery_result = future.result()
+                            except Exception:
+                                print("No result OR Error while getting result in Host Discovery Module.")
+                                pass
+                        elif index == 1:
+                            try:
+                                port_scanning_result = future.result()
+                            except Exception:
+                                print("No result OR Error while getting result in Port Scanning Module.")
+                                pass
+                        else:
+                            try:
+                                directory_enumeration_result = future.result()
+                            except Exception:
+                                print("No result OR Error while getting result in Directory Enumeration Module.")
+                                pass
+                        
+                        index += 1
+
+                    rg.imm_file(host_discovery_result, 
+                                port_scanning_result, 
+                                directory_enumeration_result)
+                    
+                count -= 1
+                    
+                   
 
         
         
