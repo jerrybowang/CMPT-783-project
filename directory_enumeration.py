@@ -10,7 +10,7 @@ import typing
 # return value is an list of tuples(url, HTTP_status_code, size)
 # Enmuerated directory will not show the size
 # HTTP_status_code == 404 / 0 will be dropped
-# HTTP_status_code == -1 means the url is unavailable
+# HTTP_status_code == -1 means the url is unavailable (not applicable any more)
 # HTTP_status_code == 0  means there is an error accessing the url
 #
 # ===========================================================
@@ -71,7 +71,8 @@ def enumerate_directory(url: str, wordlist: str) -> typing.List[tuple[str, int, 
     # check if server is online
     if get_url_dir(url)[0] == "error":
         print(f"\n{url} is unavailable\n")
-        return [(url, -1, 0)]
+        # return [(url, -1, 0)]
+        return []
 
 
     # Initialize:
