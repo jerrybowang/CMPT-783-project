@@ -5,6 +5,7 @@ import port_scanning as ps
 import directory_enumeration as de
 import result_generator as rg
 import concurrent.futures
+import time
 import os
 
 def dump_function():
@@ -97,7 +98,8 @@ if __name__ == "__main__":
                 for line in f:
                     key, value = map(str.strip, line.split(':', 1))
                     config[key] = value
-            print(config)
+            # ============
+            # print(config)
 
         except FileNotFoundError:
             print("No schedule configuration file found, please provide the configuration")
@@ -148,6 +150,7 @@ if __name__ == "__main__":
                 host_discovery_result = ([], "", 0)
                 port_scanning_result = []
                 directory_enumeration_result = []
+                
 
                 with concurrent.futures.ThreadPoolExecutor() as executor:
                     futures = []
@@ -171,36 +174,37 @@ if __name__ == "__main__":
 
                     # Wait for all futures to complete
                     concurrent.futures.wait(futures)
+
+                    
+
                     # Save results
-                    index = 0
+                    functions = [hd.host_discovery, ps.scan_all_ports, de.enumerate_directory]
+                    function_mapping = {future: func for future, func in zip(futures, functions)}
+
                     for future in concurrent.futures.as_completed(futures):
-                        if index == 0:
-                            try:
-                                host_discovery_result = future.result()
-                            except Exception:
-                                print("No result OR Error while getting result in Host Discovery Module.")
-                                pass
-                        elif index == 1:
-                            try:
-                                port_scanning_result = future.result()
-                            except Exception:
-                                print("No result OR Error while getting result in Port Scanning Module.")
-                                pass
+                        func = function_mapping[future]
+                        if func == hd.host_discovery:
+                            host_discovery_result = future.result()
+                            if not host_discovery_result:
+                                host_discovery_result = ([], "", 0)
+                        elif func == ps.scan_all_ports:
+                            port_scanning_result = future.result()
+                            if not port_scanning_result:
+                                port_scanning_result = []
                         else:
-                            try:
-                                directory_enumeration_result = future.result()
-                            except Exception:
-                                print("No result OR Error while getting result in Directory Enumeration Module.")
-                                pass
-                        
-                        index += 1
+                            directory_enumeration_result = future.result()
+                            if not directory_enumeration_result:
+                                directory_enumeration_result = []
+                    
+                    # print(host_discovery_result,"\n\n", port_scanning_result,"\n\n",directory_enumeration_result)
 
                     rg.imm_file(host_discovery_result, 
                                 port_scanning_result, 
                                 directory_enumeration_result)
                     
                 count -= 1
-                    
+                if count > 0:
+                    time.sleep(int(config['Scan_Time_Interval'])*60)
                    
 
         
