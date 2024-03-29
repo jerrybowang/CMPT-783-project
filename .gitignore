@@ -168,3 +168,4 @@ cython_debug/
 result.txt
 imm_result/
 schedule.conf
+js/node_modules/
