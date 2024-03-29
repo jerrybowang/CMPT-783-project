@@ -4,7 +4,15 @@ class directory {
    * @param {Object}
    * @param {Array}
    */
-  constructor(_config, _data, _dispatcher, _currValue, _diff) {
+  constructor(
+    _config,
+    _data,
+    _dispatcher,
+    _currValue,
+    _diff,
+    _fileName,
+    _state
+  ) {
     this.config = {
       parentElement: _config.parentElement,
       containerWidth: _config.containerWidth || 800,
@@ -16,6 +24,8 @@ class directory {
     this.dispatcher = _dispatcher;
     this.currValue = _currValue;
     this.diff = _diff;
+    this.fileName = _fileName;
+    this.state = _state;
     this.initVis();
   }
 
@@ -60,25 +70,22 @@ class directory {
       d3.quantize(d3.interpolateRainbow, vis.data.children.length + 1)
     );
 
-    // let time = ["2024-03-15_16-08-20", "2024-03-15_16-08-25"];
-    // var parseTime = d3.timeParse("%Y-%m-%d_%H-%M-%S");
-    // vis.datatime2 = time.map(function (d) {
-    //   return parseTime(d);
-    // });
-
     vis.min = 1;
-    vis.max = 10;
-
+    vis.max = vis.fileName.length;
     vis.slider = d3
       .sliderBottom()
       .min(vis.min)
       .max(vis.max)
       .step(1)
       .width(500)
+      .ticks(vis.fileName.length - 1)
+      .tickFormat(d3.format(",.0f"))
       .default(false)
       .on("onchange", (val) => {
         vis.dispatcher.call("timeline", event, val, vis.currValue);
       });
+
+    vis.time = d3.select("#time-text");
 
     d3.select("div#slider")
       .append("svg")
@@ -87,6 +94,7 @@ class directory {
       .append("g")
       .attr("transform", "translate(30,30)")
       .call(vis.slider);
+
     this.updateVis();
   }
 
@@ -116,6 +124,9 @@ class directory {
    */
   renderVis() {
     let vis = this;
+
+    // text
+    vis.time.join("p").text("Time stamp at " + vis.fileName[vis.state]);
 
     // Append the arcs.
     vis.path = vis.svg

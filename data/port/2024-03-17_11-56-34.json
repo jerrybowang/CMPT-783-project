@@ -1,0 +1,44 @@
+{
+  "openPorts": [
+    {
+      "port": 56670,
+      "name": "unknown"
+    },
+    {
+      "port": 49157,
+      "name": "unknown"
+    },
+    {
+      "port": 56585,
+      "name": "unknown"
+    },
+    {
+      "port": 7000,
+      "name": "afs3-fileserver"
+    },
+    {
+      "port": 9922,
+      "name": "unknown"
+    },
+    {
+      "port": 53372,
+      "name": "unknown"
+    },
+    {
+      "port": 2222,
+      "name": "rockwell-csp2"
+    },
+    {
+      "port": 2201,
+      "name": "ats"
+    },
+    {
+      "port": 2200,
+      "name": "ici"
+    },
+    {
+      "port": 5000,
+      "name": "commplex-main"
+    }
+  ]
+}
