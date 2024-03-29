@@ -45,6 +45,14 @@ if __name__ == "__main__":
         nargs=1
     )
     parser.add_argument(
+        "--port-range",
+        type=str,
+        help="Specify the port range for Port Scanning module. If not provided, the program will scan the most common 1,000 ports.",
+        default='',
+        metavar="PORT_RANGE",
+        nargs=1
+    )
+    parser.add_argument(
         "-e", "--enumeration",
         type=str,
         help="Run Directory Enumeration module with URL argument and an optional wordlist file. \
@@ -85,6 +93,7 @@ if __name__ == "__main__":
         # =================================== Schedule Module ================================= #
         config = {'Host_Discovery_Module': '', 
                   'Port_Scanning_Module': '', 
+                  'Port_Scanning_Range': '',
                   'Directory_Enumeration_Module': '', 
                   'Customized_Wordlist': '', 
                   'Scan_Time_Interval': '0',
@@ -107,6 +116,20 @@ if __name__ == "__main__":
             config['Host_Discovery_Module'] = input("\n- Please enter the CIDR for Host Discovery Module\n(Press Enter if NOT Active this module)\nCIDR: ")
 
             config['Port_Scanning_Module'] = input("\n- Please enter the IP Address for Port Scanning module\n(Press Enter if NOT Active this module)\nIP Address: ")
+            if config['Port_Scanning_Module']:
+                config['Port_Scanning_Range'] = input("\n- Please enter the Port Range for Port Scanning module\n(Input 1-100 if scan port 1 to 100)\n(Press Enter to use the most common 1,000 ports)\nPort Range: ")
+                verified = False
+                while not verified:
+                    try:
+                        ver = config['Port_Scanning_Range'].split('-')
+                        if len(ver) != 2:
+                            raise ValueError
+                        if int(ver[0]) > int(ver[1]):
+                            raise ValueError
+                        verified = True
+                    except (ValueError, IndexError):
+                        print("Invalid port range, please provide the range in the format of '1-100'")
+                        config['Port_Scanning_Range'] = input("\n- Please enter the Port Range for Port Scanning module\n(Input 1-100 if scan port 1 to 100)\n(Press Enter to use the most common 1,000 ports)\nPort Range: ")
 
             config['Directory_Enumeration_Module'] = input("\n- Please enter the URL for Directory Enumeration Module\n(Press Enter if NOT Active this module)\nURL: ")
             if config['Directory_Enumeration_Module']:
@@ -138,73 +161,90 @@ if __name__ == "__main__":
             pass
         os.mkdir("imm_result")
         
-        # run the program based on the configuration
+        # validate configuration
         if not config['Host_Discovery_Module'] and not config['Port_Scanning_Module'] and not config['Directory_Enumeration_Module']:
             print("Loaded configure file is invaild.")
             parser.exit()
+        
+        if config['Port_Scanning_Range']:
+            try:
+                ver = config['Port_Scanning_Range'].split('-')
+                if len(ver) != 2:
+                    raise ValueError
+                if int(ver[0]) > int(ver[1]):
+                    raise ValueError
+            except (ValueError, IndexError):
+                print("Invalid port range, loaded configure file is invaild")
+                parser.exit()
             
-        else:
-            count = int(config['Total_Scan_Number'])
-            while count > 0:
-                # reset the result
-                host_discovery_result = ([], "", 0)
-                port_scanning_result = []
-                directory_enumeration_result = []
+
+        # execute the program based on the configuration
+        count = int(config['Total_Scan_Number'])
+        while count > 0:
+            # reset the result
+            host_discovery_result = ([], "", 0)
+            port_scanning_result = []
+            directory_enumeration_result = []
+            
+
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                futures = []
+                if config['Host_Discovery_Module']:
+                    futures.append(executor.submit(hd.host_discovery, config['Host_Discovery_Module']))
+                else:
+                    futures.append(executor.submit(dump_function))
+
+                if config['Port_Scanning_Module']:
+                    port_range = config['Port_Scanning_Range'].split('-') if config['Port_Scanning_Range'] else []
+                    futures.append(executor.submit(ps.scan_all_ports, config['Port_Scanning_Module'], port_range))
+                else:
+                    futures.append(executor.submit(dump_function))
+
+                if config['Directory_Enumeration_Module']:
+                    if not config['Customized_Wordlist']:
+                        futures.append(executor.submit(de.enumerate_directory, config['Directory_Enumeration_Module'], 'default'))
+                    else:
+                        futures.append(executor.submit(de.enumerate_directory, config['Directory_Enumeration_Module'], config['Customized_Wordlist']))
+                else:
+                    futures.append(executor.submit(dump_function))
+
+                # Wait for all futures to complete
+                concurrent.futures.wait(futures)
+
                 
 
-                with concurrent.futures.ThreadPoolExecutor() as executor:
-                    futures = []
-                    if config['Host_Discovery_Module']:
-                        futures.append(executor.submit(hd.host_discovery, config['Host_Discovery_Module']))
+                # Save results
+                functions = [hd.host_discovery, ps.scan_all_ports, de.enumerate_directory]
+                function_mapping = {future: func for future, func in zip(futures, functions)}
+
+                for future in concurrent.futures.as_completed(futures):
+                    func = function_mapping[future]
+                    if func == hd.host_discovery:
+                        host_discovery_result = future.result()
+                        if not host_discovery_result:
+                            host_discovery_result = ([], "", 0)
+                    elif func == ps.scan_all_ports:
+                        port_scanning_result = future.result()
+                        if not port_scanning_result:
+                            port_scanning_result = []
                     else:
-                        futures.append(executor.submit(dump_function))
+                        directory_enumeration_result = future.result()
+                        if not directory_enumeration_result:
+                            directory_enumeration_result = []
+                
+                # print(host_discovery_result,"\n\n", port_scanning_result,"\n\n",directory_enumeration_result)
 
-                    if config['Port_Scanning_Module']:
-                        futures.append(executor.submit(ps.scan_all_ports, config['Port_Scanning_Module']))
-                    else:
-                        futures.append(executor.submit(dump_function))
-
-                    if config['Directory_Enumeration_Module']:
-                        if not config['Customized_Wordlist']:
-                            futures.append(executor.submit(de.enumerate_directory, config['Directory_Enumeration_Module'], 'default'))
-                        else:
-                            futures.append(executor.submit(de.enumerate_directory, config['Directory_Enumeration_Module'], config['Customized_Wordlist']))
-                    else:
-                        futures.append(executor.submit(dump_function))
-
-                    # Wait for all futures to complete
-                    concurrent.futures.wait(futures)
-
-                    
-
-                    # Save results
-                    functions = [hd.host_discovery, ps.scan_all_ports, de.enumerate_directory]
-                    function_mapping = {future: func for future, func in zip(futures, functions)}
-
-                    for future in concurrent.futures.as_completed(futures):
-                        func = function_mapping[future]
-                        if func == hd.host_discovery:
-                            host_discovery_result = future.result()
-                            if not host_discovery_result:
-                                host_discovery_result = ([], "", 0)
-                        elif func == ps.scan_all_ports:
-                            port_scanning_result = future.result()
-                            if not port_scanning_result:
-                                port_scanning_result = []
-                        else:
-                            directory_enumeration_result = future.result()
-                            if not directory_enumeration_result:
-                                directory_enumeration_result = []
-                    
-                    # print(host_discovery_result,"\n\n", port_scanning_result,"\n\n",directory_enumeration_result)
-
-                    rg.imm_file(host_discovery_result, 
-                                port_scanning_result, 
-                                directory_enumeration_result)
-                    
-                count -= 1
-                if count > 0:
-                    time.sleep(int(config['Scan_Time_Interval'])*60)
+                rg.imm_file(host_discovery_result, 
+                            port_scanning_result, 
+                            directory_enumeration_result)
+                
+            count -= 1
+            if count > 0:
+                time.sleep(int(config['Scan_Time_Interval'])*60)
+        
+        print("\nAll scans are completed")
+        print("The result files are saved in the 'imm_result' folder")
+        print("To use the visualization tool, please run 'python3 subprocess_data_vis.py' in the terminal.")
                    
 
         
@@ -218,8 +258,21 @@ if __name__ == "__main__":
             # run host discovery module
             host_discovery_result = hd.host_discovery(args.discovery[0])
         if args.scanning:
+            port_range = []
+            if args.port_range:
+                try:
+                    port_range = args.port_range[0].split('-')
+                    if len(port_range) != 2:
+                        print("Invalid port range, please provide the range in the format of '1-100'")
+                        parser.exit()
+                    if int(port_range[0]) > int(port_range[1]):
+                        print("Invalid port range, please provide the range in ascending order")
+                        parser.exit()
+                except (ValueError, IndexError):
+                    print("Invalid port range, please provide the range in the format of '1-100'")
+                    parser.exit()
             print(f"Port Scanning module with argument: {args.scanning[0]}")
-            port_scanning_result = ps.scan_all_ports(args.scanning[0])
+            port_scanning_result = ps.scan_all_ports(args.scanning[0], port_range)
         if args.enumeration:
             print(f"Directory Enumeration module with argument: {args.enumeration[0]} and wordlist: {args.enumeration[1] if len(args.enumeration) > 1 else 'default'}")
             if len(args.enumeration) > 1:

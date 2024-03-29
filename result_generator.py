@@ -1,11 +1,5 @@
-import pickle
 from datetime import datetime
 import os
-
-summary_set = {"host_discovery": set(),
-               "port_scanning": set(),
-               "directory_enumeration": set(),
-               }
 
 
 # helper function to generate result file
@@ -56,13 +50,6 @@ def imm_file(host_discovery_result: tuple[list[str], str, int],
                      port_scanning_result: list[str], 
                      directory_enumeration_result: list[tuple[str, int, int]]
                      ) -> None:
-    global summary_set
-    # check if we have a saved summary
-    try:
-        with open("imm_result/summary.pickle", "rb") as f:
-            summary_set = pickle.load(f)
-    except FileNotFoundError:
-        pass
 
     # create a new folder for the result
     folder_name = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -71,14 +58,12 @@ def imm_file(host_discovery_result: tuple[list[str], str, int],
     # update the summary and save the result as csv to the folder
     if host_discovery_result[0] != []:
         live_hosts = sorted(host_discovery_result[0], key=ip_sort_key)
-        summary_set["host_discovery"].update(live_hosts)
         with open(f"imm_result/{folder_name}/host_discovery.csv", "w") as f:
             f.write("Live Hosts\n")
             for ip in live_hosts:
                 f.write(f"{ip}\n")
         
     if port_scanning_result != []:
-        summary_set["port_scanning"].update(port_scanning_result)
         with open(f"imm_result/{folder_name}/port_scanning.csv", "w") as f:
             f.write("Open Ports,Name\n")
             for port in port_scanning_result:
@@ -86,15 +71,11 @@ def imm_file(host_discovery_result: tuple[list[str], str, int],
                 f.write(f"{component[0]}, {component[1]}\n")
 
     if directory_enumeration_result != []:
-        summary_set["directory_enumeration"].update(directory_enumeration_result)
         with open(f"imm_result/{folder_name}/directory_enumeration.csv", "w") as f:
             f.write("URL,Status,Size\n")
             for result in directory_enumeration_result:
                 f.write(f"{result[0]},{result[1]},{result[2]}\n")
 
-    # save the summary
-    with open("imm_result/summary.pickle", "wb") as f:
-        pickle.dump(summary_set, f)
     
     
 
