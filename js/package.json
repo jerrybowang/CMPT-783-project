@@ -1,0 +1,20 @@
+{
+    "name": "nodejs-data-visualization",
+    "version": "1.0.0",
+    "description": "A simple Node.js project",
+    "main": "readFolder.js",
+    "scripts": {
+        "start": "npm install && node readFolder.js && node server.js && http-server ../",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "node",
+        "javascript"
+    ],
+    "dependencies": {
+        "csv-parser": "^3.0.0",
+        "http-server": "^0.12.3",
+        "express": "^4.17.1",
+        "cors": "2.8.5"
+    }
+}

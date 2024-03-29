@@ -1,59 +1,132 @@
 const dispatcher = d3.dispatch("timeline");
 
-let dirView, dirData;
+let dirView, dirData, fileName;
 
-Promise.all([
-  d3.json("data/onlineData.json"),
-  d3.json("data/onlineData2.json"),
-]).then((data) => {
-  dirData = data;
-  dirView = new directory(
-    {
-      parentElement: "#directory-container",
-    },
-    dirData[0],
-    dispatcher,
-    1
-  );
-});
+fetch("http://localhost:3000/json-files/directory")
+  .then((response) => response.json())
+  .then((jsonFiles) => {
+    fileName = jsonFiles;
+    fileName = fileName.map((name) => name.replace(".json", ""));
+    const promises = jsonFiles.map((fileName) =>
+      d3.json(`data/directory/${fileName}`)
+    );
+    // dynamic data
+    Promise.all(promises).then((data) => {
+      dirData = data;
+      dirView = new directory(
+        {
+          parentElement: "#directory-container",
+        },
+        dirData[0],
+        dispatcher,
+        1,
+        "",
+        fileName,
+        0
+      );
+    });
 
+    // static data
+    // Promise.all([
+    //   d3.json("data/onlineData.json"),
+    //   d3.json("data/onlineData2.json"),
+    // ]).then((data) => {
+    //   dirData = data;
+    //   dirView = new directory(
+    //     {
+    //       parentElement: "#directory-container",
+    //     },
+    //     dirData[0],
+    //     dispatcher,
+    //     1
+    //   );
+    // });
+  });
 let portData, portView;
-Promise.all([d3.json("data/port.json"), d3.json("data/port1.json")]).then(
-  (data) => {
-    portData = data;
-    portView = new port(
-      {
-        parentElement: "#port-container",
-      },
-      portData[0],
-      "",
-      1,
-      ""
+fetch("http://localhost:3000/json-files/directory")
+  .then((response) => response.json())
+  .then((jsonFiles) => {
+    const promises = jsonFiles.map((fileName) =>
+      d3.json(`data/port/${fileName}`)
     );
-  }
-);
+    // dynamic data
+    Promise.all(promises).then((data) => {
+      portData = data;
+      portView = new port(
+        {
+          parentElement: "#port-container",
+        },
+        portData[0],
+        "",
+        1,
+        ""
+      );
+    });
+
+    // static data
+    // Promise.all([d3.json("data/port.json"), d3.json("data/port1.json")]).then(
+    //   (data) => {
+    //     portData = data;
+    //     portView = new port(
+    //       {
+    //         parentElement: "#port-container",
+    //       },
+    //       portData[0],
+    //       "",
+    //       1,
+    //       ""
+    //     );
+    //   }
+    // );
+  });
+
 let hostData, hostView;
-Promise.all([d3.json("data/hosts.json"), d3.json("data/hosts1.json")]).then(
-  (data) => {
-    hostData = data;
-    hostView = new host(
-      {
-        parentElement: "#host-container",
-      },
-      hostData[0],
-      "",
-      1,
-      ""
+
+fetch("http://localhost:3000/json-files/directory")
+  .then((response) => response.json())
+  .then((jsonFiles) => {
+    const promises = jsonFiles.map((fileName) =>
+      d3.json(`data/host/${fileName}`)
     );
-  }
-);
+    // dynamic data
+    Promise.all(promises).then((data) => {
+      hostData = data;
+      hostView = new host(
+        {
+          parentElement: "#host-container",
+        },
+        hostData[0],
+        "",
+        1,
+        ""
+      );
+    });
+
+    // static data
+    // Promise.all([d3.json("data/hosts.json"), d3.json("data/hosts1.json")]).then(
+    //   (data) => {
+    //     hostData = data;
+    //     hostView = new host(
+    //       {
+    //         parentElement: "#host-container",
+    //       },
+    //       hostData[0],
+    //       "",
+    //       1,
+    //       ""
+    //     );
+    //   }
+    // );
+  });
 /**
  * Dispatcher waits for 'timeline' event
  *  filter data based on the selected data
  */
 dispatcher.on("timeline", (_data, _currValue) => {
   diff = dirView.data = dirData[_data - 1];
+
   dirView.diff = findDiff("dir", dirData[_currValue - 1], dirData[_data - 1]);
+  dirView.state = _data - 1;
   dirView.updateVis();
 
   hostView.data = hostData[_data - 1];
