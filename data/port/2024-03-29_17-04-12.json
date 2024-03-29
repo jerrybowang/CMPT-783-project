@@ -1,0 +1,8 @@
+{
+  "openPorts": [
+    {
+      "port": 80,
+      "name": "http"
+    }
+  ]
+}
