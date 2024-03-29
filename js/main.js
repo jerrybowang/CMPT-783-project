@@ -177,7 +177,7 @@ function findDiff(type, node1, node2) {
   return arr;
 }
 function traverseDir(node1, node2, arr) {
-  if (node2.name != node1.name) {
+  if (node1 == null || node2.name != node1.name) {
     arr.push(node2.name);
   }
 

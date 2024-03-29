@@ -169,5 +169,8 @@ result.txt
 imm_result/
 schedule.conf
 js/node_modules/
-
+./DS_Store
 .DS_Store
+/data/directory
+/data/host
+/data/port
