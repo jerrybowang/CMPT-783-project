@@ -1,4 +1,3 @@
-index.html
 index.php
 index.html
 login.html
@@ -9,3 +8,7 @@ index/
 admin/
 images/
 pictures/
+cmpt783/
+cmpt783/quiz_1.html
+cmpt783/quiz_2.html
+cmpt783/quiz_3.html
