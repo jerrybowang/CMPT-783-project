@@ -118,19 +118,22 @@ if __name__ == "__main__":
             config['Port_Scanning_Module'] = input("\n- Please enter the IP Address for Port Scanning module\n(Press Enter if NOT Active this module)\nIP Address: ")
             if config['Port_Scanning_Module']:
                 config['Port_Scanning_Range'] = input("\n- Please enter the Port Range for Port Scanning module\n(Input 1-100 if scan port 1 to 100)\n(Press Enter to use the most common 1,000 ports)\nPort Range: ")
-                if config['Port_Scanning_Range']:
-                    verified = False
-                    while not verified:
-                        try:
-                            ver = config['Port_Scanning_Range'].split('-')
-                            if len(ver) != 2:
-                                raise ValueError
-                            if int(ver[0]) > int(ver[1]):
-                                raise ValueError
-                            verified = True
-                        except (ValueError, IndexError):
-                            print("Invalid port range, please provide the range in the format of '1-100'")
-                            config['Port_Scanning_Range'] = input("\n- Please enter the Port Range for Port Scanning module\n(Input 1-100 if scan port 1 to 100)\n(Press Enter to use the most common 1,000 ports)\nPort Range: ")
+
+                verified = not config['Port_Scanning_Range']
+                while not verified:
+                    try:
+                        ver = config['Port_Scanning_Range'].split('-')
+                        if len(ver) != 2:
+                            raise ValueError
+                        if int(ver[0]) > int(ver[1]):
+                            raise ValueError
+                        if int(ver[0]) < 0 or int(ver[1]) > 65535:
+                            raise ValueError
+                        verified = True
+                    except (ValueError, IndexError):
+                        print("Invalid port range, please provide the range in the format of '1-100'")
+                        config['Port_Scanning_Range'] = input("\n- Please enter the Port Range for Port Scanning module\n(Input 1-100 if scan port 1 to 100)\n(Press Enter to use the most common 1,000 ports)\nPort Range: ")
+                        verified = not config['Port_Scanning_Range']
 
             config['Directory_Enumeration_Module'] = input("\n- Please enter the URL for Directory Enumeration Module\n(Press Enter if NOT Active this module)\nURL: ")
             if config['Directory_Enumeration_Module']:
@@ -173,6 +176,8 @@ if __name__ == "__main__":
                 if len(ver) != 2:
                     raise ValueError
                 if int(ver[0]) > int(ver[1]):
+                    raise ValueError
+                if int(ver[0]) < 0 or int(ver[1]) > 65535:
                     raise ValueError
             except (ValueError, IndexError):
                 print("Invalid port range, loaded configure file is invaild")
@@ -268,6 +273,9 @@ if __name__ == "__main__":
                         parser.exit()
                     if int(port_range[0]) > int(port_range[1]):
                         print("Invalid port range, please provide the range in ascending order")
+                        parser.exit()
+                    if int(port_range[0]) < 0 or int(port_range[1]) > 65535:
+                        print("Invalid port range, please provide the range within 0-65535")
                         parser.exit()
                 except (ValueError, IndexError):
                     print("Invalid port range, please provide the range in the format of '1-100'")
