@@ -25,22 +25,6 @@ fetch("http://localhost:3000/json-files/directory")
         0
       );
     });
-
-    // static data
-    // Promise.all([
-    //   d3.json("data/onlineData.json"),
-    //   d3.json("data/onlineData2.json"),
-    // ]).then((data) => {
-    //   dirData = data;
-    //   dirView = new directory(
-    //     {
-    //       parentElement: "#directory-container",
-    //     },
-    //     dirData[0],
-    //     dispatcher,
-    //     1
-    //   );
-    // });
   });
 let portData, portView;
 fetch("http://localhost:3000/json-files/directory")
@@ -52,6 +36,7 @@ fetch("http://localhost:3000/json-files/directory")
     // dynamic data
     Promise.all(promises).then((data) => {
       portData = data;
+
       portView = new port(
         {
           parentElement: "#port-container",
@@ -62,22 +47,6 @@ fetch("http://localhost:3000/json-files/directory")
         ""
       );
     });
-
-    // static data
-    // Promise.all([d3.json("data/port.json"), d3.json("data/port1.json")]).then(
-    //   (data) => {
-    //     portData = data;
-    //     portView = new port(
-    //       {
-    //         parentElement: "#port-container",
-    //       },
-    //       portData[0],
-    //       "",
-    //       1,
-    //       ""
-    //     );
-    //   }
-    // );
   });
 
 let hostData, hostView;
@@ -101,32 +70,29 @@ fetch("http://localhost:3000/json-files/directory")
         ""
       );
     });
-
-    // static data
-    // Promise.all([d3.json("data/hosts.json"), d3.json("data/hosts1.json")]).then(
-    //   (data) => {
-    //     hostData = data;
-    //     hostView = new host(
-    //       {
-    //         parentElement: "#host-container",
-    //       },
-    //       hostData[0],
-    //       "",
-    //       1,
-    //       ""
-    //     );
-    //   }
-    // );
   });
+
+// diff button
+d3.select("#diff").on("click", function (event, d) {
+  dirView.showDiff = !dirView.showDiff;
+  hostView.showDiff = !hostView.showDiff;
+  portView.showDiff = !portView.showDiff;
+  dirView.updateVis();
+  hostView.updateVis();
+  portView.updateVis();
+  d3.select("#diff").text(
+    dirView.showDiff ? "Hide Difference" : "Show Difference"
+  );
+});
 /**
  * Dispatcher waits for 'timeline' event
  *  filter data based on the selected data
  */
 dispatcher.on("timeline", (_data, _currValue) => {
-  diff = dirView.data = dirData[_data - 1];
-
+  dirView.data = dirData[_data - 1];
   dirView.diff = findDiff("dir", dirData[_currValue - 1], dirData[_data - 1]);
   dirView.state = _data - 1;
+  dirView.currValue = _data;
   dirView.updateVis();
 
   hostView.data = hostData[_data - 1];
@@ -149,13 +115,14 @@ dispatcher.on("timeline", (_data, _currValue) => {
 function findDiff(type, node1, node2) {
   let arr = [];
   if (type == "dir") {
-    traverseDir(node1, node2, arr);
+    let visited = new Set();
+    traverseAndMark(node1, visited); 
+    traverseAndCompare(node2, visited, arr); 
   } else if (type == "host") {
     let temp = [];
     node1.hosts.forEach((data) => {
       temp.push(data);
     });
-
     node2.hosts.forEach((data) => {
       if (!temp.includes(data)) {
         arr.push(data);
@@ -176,23 +143,25 @@ function findDiff(type, node1, node2) {
 
   return arr;
 }
-function traverseDir(node1, node2, arr) {
-  if (node1 == null || node2.name != node1.name) {
-    arr.push(node2.name);
+
+// mark all directories in the visited set
+function traverseAndMark(node, visited) {
+  if (!node) return;
+  visited.add(node.name);
+  if (node.children) {
+    node.children.forEach((child) => traverseAndMark(child, visited));
   }
+}
 
-  // Determine the max length of children array for looping
-  const maxLength = Math.max(
-    node1 && node1.children ? node1.children.length : 0,
-    node2 && node2.children ? node2.children.length : 0
-  );
-
-  // Traverse the children of both nodes if they exist
-  for (let i = 0; i < maxLength; i++) {
-    traverseDir(
-      node1 && node1.children && node1.children[i] ? node1.children[i] : null,
-      node2 && node2.children && node2.children[i] ? node2.children[i] : null,
-      arr
+// compare and find new directories in node2
+function traverseAndCompare(node, visited, differences) {
+  if (!node) return;
+  if (!visited.has(node.name)) {
+    differences.push(node.name);
+  }
+  if (node.children) {
+    node.children.forEach((child) =>
+      traverseAndCompare(child, visited, differences)
     );
   }
 }

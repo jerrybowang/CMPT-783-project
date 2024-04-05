@@ -26,6 +26,7 @@ class directory {
     this.diff = _diff;
     this.fileName = _fileName;
     this.state = _state;
+    this.showDiff = false;
     this.initVis();
   }
 
@@ -135,7 +136,7 @@ class directory {
       .data(vis.root.descendants().slice(1))
       .join("path")
       .attr("fill", (d) => {
-        if (vis.diff != undefined && vis.diff.includes(d.data.name)) {
+        if (vis.showDiff && vis.diff != undefined && vis.diff.includes(d.data.name)) {
           return "#F4CF20";
         } else {
           while (d.depth > 1) d = d.parent;
@@ -165,7 +166,7 @@ class directory {
         .ancestors()
         .map((d) => d.data.name)
         .reverse()
-        .join("/")}\n${format(d.size)}`;
+        .join("/")}\n${format(d.value)}`;
     });
 
     let labels = vis.label
