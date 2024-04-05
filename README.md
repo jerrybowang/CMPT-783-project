@@ -1,5 +1,14 @@
 # CMPT-783-project
 
+## Disclaimer
+Please note that this tool is intended for legitimate security testing and assessment purposes only. Users must comply with all applicable laws and regulations. We disclaim any responsibility for any illegal activities resulting from the misuse of this tool.
+
+We strongly advise obtaining explicit authorization from the owners of the target systems before using this tool. Scanning or testing of others' systems without permission is strictly prohibited.
+
+Users must understand and agree that the use of this tool may pose risks of system instability or even unavailability. We shall not be liable for any loss or damage caused by the use of this tool.
+
+Lastly, users should be aware that the results provided by this tool may not be entirely accurate due to various factors. Therefore, users should carefully review and validate the information obtained before making any decisions.
+
 ## Group menber
 - Jerry Wang: [@jerrybowang](https://github.com/jerrybowang)
 - Roy Zhong: [@royroyzhong](https://github.com/royroyzhong)
