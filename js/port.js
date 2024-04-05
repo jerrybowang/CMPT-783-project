@@ -16,6 +16,7 @@ class port {
     this.dispatcher = _dispatcher;
     this.currValue = _currValue;
     this.diff = _diff;
+    this.showDiff = false;
     this.initVis();
   }
 
@@ -45,6 +46,7 @@ class port {
    */
   updateVis() {
     let vis = this;
+    vis.data.openPorts = vis.data.openPorts.sort((a, b) => a.port - b.port);
 
     vis.renderVis();
   }
@@ -82,7 +84,7 @@ class port {
       .style("border", "1px black solid")
       .style("padding", "5px")
       .style("background", (d) => {
-        if (vis.diff != undefined && vis.diff.includes(d.port)) {
+        if (vis.showDiff&&vis.diff != undefined && vis.diff.includes(d.port)) {
           return "#F4CF20";
         }
       })

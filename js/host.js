@@ -16,9 +16,9 @@ class host {
     this.dispatcher = _dispatcher;
     this.currValue = _currValue;
     this.diff = _diff;
+    this.showDiff = false;
     this.initVis();
   }
-
 
   initVis() {
     let vis = this;
@@ -43,6 +43,7 @@ class host {
    */
   updateVis() {
     let vis = this;
+    vis.data.hosts = vis.data.hosts.sort((a, b) => a - b);
 
     vis.renderVis();
   }
@@ -74,14 +75,8 @@ class host {
       .style("border", "1px black solid")
       .style("padding", "5px")
       .style("background", (d) => {
-        if (vis.diff != undefined && vis.diff.includes(d)) return "#F4CF20";
-      })
-
-      .on("mouseover", function () {
-        d3.select(this).style("background-color", "#cfe2f2");
-      })
-      .on("mouseout", function () {
-        d3.select(this).style("background-color", "white");
+        if (vis.showDiff&&vis.diff != undefined && vis.diff.includes(d)) return "#F4CF20";
       });
+
   }
 }

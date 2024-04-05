@@ -2,6 +2,10 @@ function createHierarchy(urls) {
   const hostname = new URL(urls[0].url).hostname;
   const root = { name: hostname, children: [] };
 
+  const totalSize = urls.reduce((acc, current) => {
+    return acc + Number(current.size); 
+  }, 0); 
+
   urls.forEach((item) => {
     let currentNode = root;
     const pathSegments = new URL(item.url).pathname.split("/").filter(Boolean);
@@ -16,8 +20,11 @@ function createHierarchy(urls) {
       }
       currentNode = childNode;
     });
-
-    currentNode.leafData = { size: item.size, url: item.url };
+    if (item.size == 0) {
+      currentNode.leafData = { size: totalSize/100, url: item.url };
+    } else {
+      currentNode.leafData = { size: parseInt(item.size), url: item.url };
+    }
   });
 
   function finalizeNodes(node) {
