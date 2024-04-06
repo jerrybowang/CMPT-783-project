@@ -1,0 +1,9 @@
+URL,Status,Size
+http://10.13.37.103:80/cmpt783/,200,0
+http://10.13.37.103:80/server-status/,200,0
+http://10.13.37.103:80/client-status/,200,0
+http://10.13.37.103:80/icons/,403,0
+http://10.13.37.103:80/cmpt783/quiz_2.html,200,0
+http://10.13.37.103:80/cmpt783/quiz_1.html,200,0
+http://10.13.37.103:80/index.html,200,108
+http://10.13.37.103:80/cmpt783/quiz_3.html,200,0
