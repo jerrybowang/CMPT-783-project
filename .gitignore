@@ -166,7 +166,7 @@ cython_debug/
 
 # other artifacts
 result.txt
-# imm_result/
+imm_result/
 schedule.conf
 js/node_modules/
 ./DS_Store
