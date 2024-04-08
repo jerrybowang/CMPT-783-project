@@ -84,15 +84,13 @@ class port {
       .style("border", "1px black solid")
       .style("padding", "5px")
       .style("background", (d) => {
-        if (vis.showDiff&&vis.diff != undefined && vis.diff.includes(d.port)) {
+        if (
+          vis.showDiff &&
+          vis.diff != undefined &&
+          vis.diff.includes(d.port)
+        ) {
           return "#F4CF20";
         }
-      })
-      .on("mouseover", function () {
-        d3.select(this).style("background-color", "#cfe2f2");
-      })
-      .on("mouseout", function () {
-        d3.select(this).style("background-color", "white");
       });
   }
 }
