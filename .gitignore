@@ -175,3 +175,4 @@ js/node_modules/
 /data/directory
 /data/host
 /data/port
+/js/package-lock.json
