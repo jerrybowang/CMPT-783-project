@@ -26,6 +26,7 @@ fetch("http://localhost:3000/json-files/directory")
       );
     });
   });
+  
 let portData, portView;
 fetch("http://localhost:3000/json-files/directory")
   .then((response) => response.json())

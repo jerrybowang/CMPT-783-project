@@ -8,11 +8,12 @@ const port = 3000;
 // Path to the data directory relative to server.js
 const dataDirPath = path.join(__dirname, "..", "data");
 
-// Serve static files from public directory (assuming it's on the same level as js)
+// Serve static files from public directory
 app.use(express.static(path.join(__dirname, "..", "public")));
 // Enable CORS for all routes
 app.use(cors());
-// Endpoint to list JSON files from a specific data subfolder
+
+// Serve JSON files from the data directory
 app.get("/json-files/:folderName", (req, res) => {
   const folderName = req.params.folderName;
   const folderPath = path.join(dataDirPath, folderName);
@@ -28,7 +29,7 @@ app.get("/json-files/:folderName", (req, res) => {
   });
 });
 
-// Serve JSON files from any subfolder within the data directory
+// Serve JSON files from the data directory
 app.use("/data", express.static(dataDirPath));
 
 app.listen(port, () => {

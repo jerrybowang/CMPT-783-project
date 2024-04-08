@@ -21,7 +21,7 @@ class port {
   }
 
   /**
-   * We initialize scales/axes and append static elements, such as axis titles.
+   * Initialize scales/axes and append static elements, such as axis titles.
    */
   initVis() {
     let vis = this;

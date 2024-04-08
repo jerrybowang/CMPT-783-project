@@ -2,8 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const csvParser = require("csv-parser");
 const createHierarchy = require("./createHierarchy");
-
-const rootDir = path.join(__dirname, "../imm_result"); // Adjust if necessary
+const rootDir = path.join(__dirname, "../imm_result");
 const targetDirs = {
   "directory_enumeration.csv": "../data/directory",
   "host_discovery.csv": "../data/host",
