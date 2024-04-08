@@ -136,7 +136,11 @@ class directory {
       .data(vis.root.descendants().slice(1))
       .join("path")
       .attr("fill", (d) => {
-        if (vis.showDiff && vis.diff != undefined && vis.diff.includes(d.data.name)) {
+        if (
+          vis.showDiff &&
+          vis.diff != undefined &&
+          vis.diff.includes(d.data.name)
+        ) {
           return "#F4CF20";
         } else {
           while (d.depth > 1) d = d.parent;
@@ -168,6 +172,29 @@ class directory {
         .reverse()
         .join("/")}\n${format(d.value)}`;
     });
+
+    vis.path
+      .on("mouseover", (event, d) => {
+
+        let type;
+        if(d.data.children!=undefined){
+          type="Folder";
+        }else{
+          type="File";
+        }
+        d3
+          .select("#tooltip")
+          .style("display", "block")
+          .style("left", event.pageX + vis.config.tooltipPadding + "px")
+          .style("top", event.pageY + vis.config.tooltipPadding + "px").html(`
+          <div class="tooltip-title">${d.data.name}</div>
+          <div><i>Size: ${d.value}</i></div>
+          <div><i>Size: ${type}</i></div>
+          `);
+      })
+      .on("mouseleave", () => {
+        d3.select("#tooltip").style("display", "none");
+      });
 
     let labels = vis.label
       .selectAll("text")

@@ -53,6 +53,7 @@ function processCsvFile(filePath, targetDirName, timeStamp) {
       let temp;
       if (isDirectoryFile) {
         temp = createHierarchy.processJsonData(jsonRows);
+
       } else if (isHostFile) {
         temp = { hosts: jsonRows };
       } else {
