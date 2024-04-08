@@ -3,4 +3,4 @@ Open Ports,Name
 443, https
 3306, mysql
 5432, postgres
-8080, http-proxy
+8080, http-alt
