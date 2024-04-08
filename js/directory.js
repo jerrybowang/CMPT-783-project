@@ -188,8 +188,7 @@ class directory {
           .style("left", event.pageX + vis.config.tooltipPadding + "px")
           .style("top", event.pageY + vis.config.tooltipPadding + "px").html(`
           <div class="tooltip-title">${d.data.name}</div>
-          <div><i>Size: ${d.value}</i></div>
-          <div><i>Size: ${type}</i></div>
+          <div><i>Type: ${type}</i></div>
           `);
       })
       .on("mouseleave", () => {
