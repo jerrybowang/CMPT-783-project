@@ -3,8 +3,8 @@ function createHierarchy(urls) {
   const root = { name: hostname, children: [] };
 
   const totalSize = urls.reduce((acc, current) => {
-    return acc + Number(current.size); 
-  }, 0); 
+    return acc + Number(current.size);
+  }, 0);
 
   urls.forEach((item) => {
     let currentNode = root;
@@ -20,10 +20,19 @@ function createHierarchy(urls) {
       }
       currentNode = childNode;
     });
+
     if (item.size == 0) {
-      currentNode.leafData = { size: totalSize/100, url: item.url };
+      currentNode.leafData = {
+        size: totalSize / 100,
+        url: item.url,
+        status: parseInt(item.status),
+      };
     } else {
-      currentNode.leafData = { size: parseInt(item.size), url: item.url };
+      currentNode.leafData = {
+        size: parseInt(item.size),
+        url: item.url,
+        status: parseInt(item.status),
+      };
     }
   });
 
@@ -66,6 +75,7 @@ function pruneNodes(node) {
 //createHierarchy json data and prune nodes
 function processJsonData(jsonData) {
   const hierarchy = createHierarchy(jsonData);
+
   pruneNodes(hierarchy);
   return hierarchy;
 }
