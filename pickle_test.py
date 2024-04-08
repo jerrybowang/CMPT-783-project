@@ -1,3 +1,6 @@
+# This script is used to pickle the 1000 common ports for use in the port_scanning.py
+
+
 import pickle
 
 

@@ -292,9 +292,7 @@ if __name__ == "__main__":
         rg.txt_result_generator(host_discovery_result, 
                                 port_scanning_result, 
                                 directory_enumeration_result)
-        # rg.imm_file(host_discovery_result, 
-        #             port_scanning_result, 
-        #             directory_enumeration_result)
+        print("The result files are generated in result.txt file.")
         
     
 
