@@ -31,6 +31,7 @@ class port {
       .attr("position", "relative")
       .attr("padding", "70px");
 
+      // Create the table
     vis.table = vis.container
       .append("table")
       .attr("class", "table")

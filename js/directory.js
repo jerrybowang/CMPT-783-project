@@ -71,6 +71,7 @@ class directory {
       d3.quantize(d3.interpolateRainbow, vis.data.children.length + 1)
     );
 
+    // Create the slider.
     vis.min = 1;
     vis.max = vis.fileName.length;
     vis.slider = d3
@@ -163,8 +164,8 @@ class directory {
         this.clicked(event, d, vis, labels);
       });
 
+      // Add title to the arcs.
     const format = d3.format(",d");
-
     vis.path.join("title").text((d) => {
       return `${d
         .ancestors()
@@ -173,9 +174,9 @@ class directory {
         .join("/")}\n${format(d.value)}`;
     });
 
+    // Add tooltip to the arcs.
     vis.path
       .on("mouseover", (event, d) => {
-
         let type;
         if(d.data.children!=undefined){
           type="Folder";
@@ -245,10 +246,6 @@ class directory {
     );
 
     const t = vis.svg.transition().duration(750);
-
-    // Transition the data on all arcs, even the ones that aren’t visible,
-    // so that if this transition is interrupted, entering arcs will start
-    // the next transition from the desired position.
     vis.path
       .transition(t)
       .tween("data", (d) => {
